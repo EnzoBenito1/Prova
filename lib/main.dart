@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
 void main() => runApp(AgendaApp());
 
@@ -102,6 +103,12 @@ class _ContactFormScreenState extends State<ContactFormScreen> {
   late String phone;
   late String email;
 
+  final phoneMaskFormatter = MaskTextInputFormatter(
+      mask: '(##) #####-####',
+      filter: { "#": RegExp(r'[0-9]') },
+      type: MaskAutoCompletionType.lazy
+  );
+
   @override
   void initState() {
     super.initState();
@@ -136,9 +143,14 @@ class _ContactFormScreenState extends State<ContactFormScreen> {
               TextFormField(
                 initialValue: phone,
                 decoration: InputDecoration(labelText: 'Telefone'),
+                keyboardType: TextInputType.phone,
+                inputFormatters: [phoneMaskFormatter],
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Por favor, insira um telefone';
+                  }
+                  if (value.length < 14) {
+                    return 'Por favor, insira um telefone válido';
                   }
                   return null;
                 },
