@@ -1,4 +1,5 @@
 Versão inicial
+
 Este é um aplicativo de agenda feito no Flutter que permite gerenciar contatos como nome, telefone e e-mail.
 
 Suas funcionalidades:
