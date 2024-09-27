@@ -10,4 +10,4 @@ Requisitos: Precisa ter o flutter instalado em sua máquina,
 depois basta apenas jogá-lo no Android studios e ser feliz!
 
 Clonar git usando bash
-git clone https://github.com//.git
+git clone https://github.com/EnzoBenito1/Prova.git
