@@ -8,7 +8,13 @@ class AgendaApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Agenda de Contatos',
-      theme: ThemeData(primarySwatch: Colors.blue),
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        snackBarTheme: SnackBarThemeData(
+          backgroundColor: Colors.blue,
+          contentTextStyle: TextStyle(color: Colors.white),
+        ),
+      ),
       home: ContactListScreen(),
     );
   }
@@ -34,7 +40,9 @@ class _ContactListScreenState extends State<ContactListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Agenda de Contatos')),
-      body: ListView.builder(
+      body: contacts.isEmpty
+          ? Center(child: Text('Nenhum contato'))
+          : ListView.builder(
         itemCount: contacts.length,
         itemBuilder: (context, index) {
           return ListTile(
@@ -64,6 +72,9 @@ class _ContactListScreenState extends State<ContactListScreen> {
       setState(() {
         contacts.add(result);
       });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Contato adicionado')),
+      );
     }
   }
 
@@ -78,13 +89,40 @@ class _ContactListScreenState extends State<ContactListScreen> {
       setState(() {
         contacts[index] = result;
       });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Contato atualizado')),
+      );
     }
   }
 
   void _removeContact(int index) {
-    setState(() {
-      contacts.removeAt(index);
-    });
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirmação'),
+          content: Text('Excluir este contato?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancelar'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            TextButton(
+              child: Text('Excluir'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                setState(() {
+                  contacts.removeAt(index);
+                });
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Contato removido!')),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }
 
@@ -104,12 +142,11 @@ class _ContactFormScreenState extends State<ContactFormScreen> {
   late String email;
 
   final phoneMaskFormatter = MaskTextInputFormatter(
-      mask: '(###) ###-##-##',
+      mask: '(##) #####-####',
       filter: { "#": RegExp(r'[0-9]') },
       type: MaskAutoCompletionType.lazy
   );
 
-  // Expressão regular para validação de e-mail
   final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
 
   @override
@@ -134,7 +171,12 @@ class _ContactFormScreenState extends State<ContactFormScreen> {
             children: <Widget>[
               TextFormField(
                 initialValue: name,
-                decoration: InputDecoration(labelText: 'Nome'),
+                decoration: InputDecoration(
+                  labelText: 'Nome',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.person),
+                  hintText: 'Paulo',
+                ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Por favor, insira um nome';
@@ -143,9 +185,15 @@ class _ContactFormScreenState extends State<ContactFormScreen> {
                 },
                 onSaved: (value) => name = value!,
               ),
+              SizedBox(height: 16),
               TextFormField(
                 initialValue: phone,
-                decoration: InputDecoration(labelText: 'Telefone'),
+                decoration: InputDecoration(
+                  labelText: 'Telefone',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.phone),
+                  hintText: '(67) 99517-9810',
+                ),
                 keyboardType: TextInputType.phone,
                 inputFormatters: [phoneMaskFormatter],
                 validator: (value) {
@@ -159,9 +207,15 @@ class _ContactFormScreenState extends State<ContactFormScreen> {
                 },
                 onSaved: (value) => phone = value!,
               ),
+              SizedBox(height: 16),
               TextFormField(
                 initialValue: email,
-                decoration: InputDecoration(labelText: 'E-mail'),
+                decoration: InputDecoration(
+                  labelText: 'E-mail',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.email),
+                  hintText: 'exemplo@email.com',
+                ),
                 keyboardType: TextInputType.emailAddress,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -174,8 +228,12 @@ class _ContactFormScreenState extends State<ContactFormScreen> {
                 },
                 onSaved: (value) => email = value!,
               ),
+              SizedBox(height: 24),
               ElevatedButton(
                 child: Text('Salvar'),
+                style: ElevatedButton.styleFrom(
+                  minimumSize: Size(double.infinity, 50),
+                ),
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     _formKey.currentState!.save();
