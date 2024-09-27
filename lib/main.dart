@@ -104,10 +104,13 @@ class _ContactFormScreenState extends State<ContactFormScreen> {
   late String email;
 
   final phoneMaskFormatter = MaskTextInputFormatter(
-      mask: '(##) #####-####',
+      mask: '(###) ###-##-##',
       filter: { "#": RegExp(r'[0-9]') },
       type: MaskAutoCompletionType.lazy
   );
+
+  // Expressão regular para validação de e-mail
+  final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
 
   @override
   void initState() {
@@ -159,9 +162,13 @@ class _ContactFormScreenState extends State<ContactFormScreen> {
               TextFormField(
                 initialValue: email,
                 decoration: InputDecoration(labelText: 'E-mail'),
+                keyboardType: TextInputType.emailAddress,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Por favor, insira um e-mail';
+                  }
+                  if (!emailRegex.hasMatch(value)) {
+                    return 'Por favor, insira um e-mail válido';
                   }
                   return null;
                 },
